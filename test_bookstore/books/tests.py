@@ -5,19 +5,32 @@ from .models import Book, Author
 
 class BookListTestCase(APITestCase):
     def setUp(self):
-        self.author = Author.objects.create(first_name='John', last_name='Doe')
-        self.book = Book.objects.create(title='Book 1', author=self.author, count=10)
+        self.author1 = Author.objects.create(first_name='John', last_name='Doe')
+        self.author2 = Author.objects.create(first_name='Jane', last_name='Doe')
+        self.book1 = Book.objects.create(title='Book 1', author=self.author1, count=10)
+        self.book2 = Book.objects.create(title='Book 2', author=self.author2, count=10)
 
     def test_get_books(self):
         response = self.client.get(reverse('book-list'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
+        self.assertEqual(len(response.data), 2)
 
     def test_post_book(self):
-        data = {'title': 'Book 2', 'author_id': self.author.id, 'count': 5}
+        data = {'title': 'Book 2', 'author_id': self.author1.id, 'count': 5}
         response = self.client.post(reverse('book-list'), data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Book.objects.count(), 2)
+        self.assertEqual(Book.objects.count(), 3)
+
+    def test_filter_by_author(self):
+        response = self.client.get(reverse('book-list'), {'author': self.author1.id})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['title'], 'Book 1')
+
+    def test_filter_by_author_not_found(self):
+        response = self.client.get(reverse('book-list'), {'author': 999})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 0)
 
 class BookDetailTestCase(APITestCase):
     def setUp(self):

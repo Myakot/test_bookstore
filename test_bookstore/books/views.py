@@ -8,6 +8,13 @@ class BookList(generics.ListCreateAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
 
+    def get_queryset(self):
+        queryset = Book.objects.all()
+        author = self.request.GET.get('author')
+        if author:
+            queryset = queryset.filter(author_id=author)
+        return queryset
+
 class BookDetail(generics.RetrieveUpdateAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
