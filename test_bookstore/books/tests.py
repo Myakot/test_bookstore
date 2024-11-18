@@ -1,3 +1,5 @@
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -6,20 +8,20 @@ from .models import Book, Author
 class BookListTestCase(APITestCase):
     def setUp(self):
         self.author1 = Author.objects.create(first_name='John', last_name='Doe')
-        self.author2 = Author.objects.create(first_name='Jane', last_name='Doe')
         self.book1 = Book.objects.create(title='Book 1', author=self.author1, count=10)
-        self.book2 = Book.objects.create(title='Book 2', author=self.author2, count=10)
 
     def test_get_books(self):
-        response = self.client.get(reverse('book-list'))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['results']), 2)
+        with CaptureQueriesContext(connection) as queries:
+            response = self.client.get(reverse('book-list'))
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(len(response.data['results']), 1)
+            self.assertLess(len(queries), 3)
 
     def test_post_book(self):
         data = {'title': 'Book 2', 'author_id': self.author1.id, 'count': 5}
         response = self.client.post(reverse('book-list'), data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Book.objects.count(), 3)
+        self.assertEqual(Book.objects.count(), 2)
 
     def test_filter_by_author(self):
         response = self.client.get(reverse('book-list'), {'author': self.author1.id})

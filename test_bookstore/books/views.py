@@ -1,3 +1,5 @@
+from django.shortcuts import get_object_or_404
+from django.core.cache import cache
 from django.http import JsonResponse
 from rest_framework import generics, status
 from rest_framework.response import Response
@@ -21,16 +23,23 @@ class StandardResultsSetPagination(PageNumberPagination):
         return page_size
 
 class BookList(generics.ListCreateAPIView):
-    queryset = Book.objects.all().order_by('id')
+    queryset = Book.objects.select_related('author').all().order_by('id')
     serializer_class = BookSerializer
     pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
-        queryset = Book.objects.all().order_by('id')
-        author = self.request.GET.get('author')
-        if author:
-            queryset = queryset.filter(author_id=author)
+        queryset = Book.objects.select_related('author').all().order_by('id')
+        if 'author' in self.request.GET:
+            queryset = queryset.filter(author_id=self.request.GET['author'])
         return queryset
+
+    def get_object(self):
+        cache_key = 'book_{}'.format(self.kwargs['pk'])
+        obj = cache.get(cache_key)
+        if obj is None:
+            obj = super().get_object()
+            cache.set(cache_key, obj)
+        return obj
 
     def dispatch(self, request, *args, **kwargs):
         page_size = request.GET.get('page_size')
@@ -44,7 +53,7 @@ class BookDetail(generics.RetrieveUpdateAPIView):
 
 class BookBuy(APIView):
     def post(self, request, pk):
-        book = Book.objects.get(pk=pk)
+        book = get_object_or_404(Book, pk=pk)
         if book.count > 0:
             book.count -= 1
             book.save()
