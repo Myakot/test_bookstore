@@ -64,7 +64,6 @@ class BookListTestCase(APITestCase):
         self.assertEqual(len(response.data["results"]), 5)
 
     def test_pagination_invalid_page_size(self):
-
         for i in range(15):
             Book.objects.create(title=f"Book {i}", author=self.author1, count=10)
 
