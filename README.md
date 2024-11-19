@@ -1,31 +1,86 @@
-Напишите небольшое приложение которые имитирует работу книжного магазина, оперируем всего двумя объектами - книгой и автором.
+# Bookstore API Project
+=====================================
 
-Объект книги:
+## Overview
+------------
 
-1. id (int)
-2. title (str)
-3. author (id)
-4. count (int) - остаток книг на складе
+This project is a simple bookstore API built using Django and Django REST framework. It allows users to interact with two main objects: books and authors.
 
-Объект автор:
+### Books
 
-1. id (int)
-2. first_name (str)
-3. last_name (str)
+*   `id` (int): Unique identifier for the book
+*   `title` (str): Title of the book
+*   `author` (id): Foreign key referencing the author of the book
+*   `count` (int): Number of copies of the book in stock
 
-Приложение должно реализовывать следующее апи:
+### Authors
 
-1. `GET /api/books` - возвращает список книг
-2. `POST /api/books` - создает новую книгу
-3. `PUT /api/books/{id}` - редактирует книгу
-4. `POST /api/books/{id}/buy` - апи для покупки книги, уменьшает счетчик count если он положительный или возвращает ошибку
-5. `GET /api/authors` - возвращает список авторов, для каждого автора отдаем список его книг (только названия)
-6. `POST /api/authors` - создает нового автора
-7. `PUT /api/authors/{id}` - редактирует автора
+*   `id` (int): Unique identifier for the author
+*   `first_name` (str): First name of the author
+*   `last_name` (str): Last name of the author
 
-Так же добавьте:
+## API Endpoints
+----------------
 
-1. Возможность фильтрации книг по автору
-2. Возможность пагинации по книгам
+The API provides the following endpoints:
 
-При реализации определенных фич вам необходимо учитывать что наш магазин продает миллионы книг.
+### Books
+
+*   `GET /api/books`: Returns a list of all books
+*   `POST /api/books`: Creates a new book
+*   `PUT /api/books/{id}`: Updates a book
+*   `POST /api/books/{id}/buy`: Buys a book and decrements the count
+
+### Authors
+
+*   `GET /api/authors`: Returns a list of all authors
+*   `POST /api/authors`: Creates a new author
+*   `PUT /api/authors/{id}`: Updates an author
+
+## Requirements
+---------------
+
+*   Python 3.10
+*   Django 5.1.3
+*   Django REST framework 3.15.2
+
+## Installation
+------------
+
+1.  Clone the repository
+2.  Install the requirements using pip: `pip install -r requirements.txt`
+3.  Run the migrations: `python manage.py migrate`
+4.  Run the server: `python manage.py runserver`
+
+## Usage
+-----
+
+Use a tool like curl or Postman to interact with the API endpoints.
+
+Example:
+
+*   Get all books: `curl http://localhost:8000/api/books`
+*   Create a new book: `curl -X POST -H "Content-Type: application/json" -d '{"title": "New Book", "author": 1, "count": 10}' http://localhost:8000/api/books`
+
+## Testing
+-------
+
+Run the tests using the following command: `python manage.py test`
+
+## Docker
+-------
+
+A Dockerfile is provided to build a Docker image for the project.
+
+1.  Build the image: `make docker build`
+2.  Run the container: `make docker-compose up`
+
+## Contributing
+------------
+
+Contributions are not required, but if you want to, you're always welcome! Please submit a pull request with your changes.
+
+## License
+-------
+
+This project is licensed under the MIT License. See LICENSE for details.

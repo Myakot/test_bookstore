@@ -1,0 +1,3 @@
+[flake8]
+ignore = E501,E402,E403
+exclude = .venv,__pycache__,*.egg-info,dist,build,.git,.hg,.svn,.bzr
