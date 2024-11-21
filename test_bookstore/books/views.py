@@ -33,17 +33,6 @@ class BookList(generics.ListCreateAPIView):
     search_fields = ['author__first_name', 'author__last_name']
     filterset_fields = ['author']
 
-    def get_queryset(self):
-        return Book.objects.select_related("author").all().order_by("id")
-
-    def get_object(self):
-        cache_key = "book_{}".format(self.kwargs["pk"])
-        obj = cache.get(cache_key)
-        if obj is None:
-            obj = super().get_object()
-            cache.set(cache_key, obj)
-        return obj
-
 
 class BookDetail(generics.RetrieveUpdateAPIView):
     queryset = Book.objects.all()
@@ -53,7 +42,7 @@ class BookDetail(generics.RetrieveUpdateAPIView):
 class BookBuy(APIView):
     @transaction.atomic
     def post(self, request, pk):
-        book = get_object_or_404(Book, pk=pk)
+        book = Book.objects.select_for_update().get(pk=pk)
         if book.count > 0:
             book.count -= 1
             book.save()
