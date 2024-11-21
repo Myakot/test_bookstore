@@ -1,8 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.core.cache import cache
-from django.http import JsonResponse
 from django.db import transaction
-from rest_framework import generics, status
+from rest_framework import generics, status, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
@@ -30,6 +29,9 @@ class BookList(generics.ListCreateAPIView):
     queryset = Book.objects.select_related("author").all().order_by("id")
     serializer_class = BookSerializer
     pagination_class = StandardResultsSetPagination
+    filter_backends = [filters.SearchFilter]
+    filterset_fields = ['author']
+    search_fields = ['author_name']
 
     def get_queryset(self):
         queryset = Book.objects.select_related("author").all().order_by("id")
