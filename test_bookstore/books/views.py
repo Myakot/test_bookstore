@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.core.cache import cache
 from django.http import JsonResponse
+from django.db import transaction
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -44,14 +45,6 @@ class BookList(generics.ListCreateAPIView):
             cache.set(cache_key, obj)
         return obj
 
-    def dispatch(self, request, *args, **kwargs):
-        page_size = request.GET.get("page_size")
-        if page_size and int(page_size) > self.pagination_class.max_page_size:
-            return JsonResponse(
-                {"error": "Invalid page size"}, status=status.HTTP_400_BAD_REQUEST
-            )
-        return super().dispatch(request, *args, **kwargs)
-
 
 class BookDetail(generics.RetrieveUpdateAPIView):
     queryset = Book.objects.all()
@@ -59,6 +52,7 @@ class BookDetail(generics.RetrieveUpdateAPIView):
 
 
 class BookBuy(APIView):
+    @transaction.atomic
     def post(self, request, pk):
         book = get_object_or_404(Book, pk=pk)
         if book.count > 0:

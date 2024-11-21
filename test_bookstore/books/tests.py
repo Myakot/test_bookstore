@@ -63,13 +63,6 @@ class BookListTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 5)
 
-    def test_pagination_invalid_page_size(self):
-        for i in range(15):
-            Book.objects.create(title=f"Book {i}", author=self.author1, count=10)
-
-        response = self.client.get(reverse("book-list"), {"page_size": 1001})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
     def test_pagination_empty_page(self):
         response = self.client.get(reverse("book-list"), {"page": 2})
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
