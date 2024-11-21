@@ -30,14 +30,11 @@ class BookList(generics.ListCreateAPIView):
     serializer_class = BookSerializer
     pagination_class = StandardResultsSetPagination
     filter_backends = [filters.SearchFilter]
+    search_fields = ['author__first_name', 'author__last_name']
     filterset_fields = ['author']
-    search_fields = ['author_name']
 
     def get_queryset(self):
-        queryset = Book.objects.select_related("author").all().order_by("id")
-        if "author" in self.request.GET:
-            queryset = queryset.filter(author_id=self.request.GET["author"])
-        return queryset
+        return Book.objects.select_related("author").all().order_by("id")
 
     def get_object(self):
         cache_key = "book_{}".format(self.kwargs["pk"])

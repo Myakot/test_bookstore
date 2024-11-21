@@ -31,7 +31,7 @@ class BookListTestCase(APITestCase):
         self.assertEqual(response.data["results"][0]["title"], "Book 1")
 
     def test_filter_by_author_not_found(self):
-        response = self.client.get(reverse("book-list"), {"author": 999})
+        response = self.client.get(reverse("book-list"), {"search": "999"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 0)
 
